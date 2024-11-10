@@ -1,29 +1,45 @@
 import streamlit as st
+import openai
 import spacy
-from transformers import pipeline
 
-# Load Spacy NLP model for text processing
-nlp = spacy.load('en_core_web_sm')
+# Load SpaCy model
+nlp = spacy.load("en_core_web_sm")
 
-# Load GPT-based model for generating responses
-chat_model = pipeline('text-generation', model='gpt2')
+# Streamlit app setup
+st.title("GPT Chat Interface")
 
-def generate_response(user_input):
-    # Process the user input with Spacy
-    doc = nlp(user_input)
+# Set OpenAI API key
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-    # Generate a response using the GPT-based model
-    response = chat_model(user_input, max_length=150, num_return_sequences=1)
-    return response[0]['generated_text']
+def generate_response(prompt):
+    """Generates a response from OpenAI's GPT-3 model."""
+    try:
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=prompt,
+            max_tokens=150,
+            n=1,
+            stop=None,
+            temperature=0.7
+        )
+        return response.choices[0].text.strip()
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        return ""
 
-# Streamlit UI setup
-st.title("JK's Chat Interface")
-st.write("Interact with an AI-powered chat interface!")
+# Input text from the user
+user_input = st.text_input("Enter your message:", "Hello, how can I connect with my spiritual side?")
 
-# User input box
-user_input = st.text_input("You:", "")
-
-# Display response if input is provided
 if user_input:
+    # Process input with SpaCy
+    doc = nlp(user_input)
+    st.write("## Processed Input:")
+    for token in doc:
+        st.write(f"{token.text} ({token.pos_})")
+    
+    # Generate response
     response = generate_response(user_input)
-    st.text_area("AI:", response)
+    st.write("## GPT-3 Response:")
+    st.write(response)
+
+st.write("*This app utilizes OpenAI's GPT-3 and SpaCy for natural language processing.")
