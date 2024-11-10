@@ -17,7 +17,7 @@ def generate_response(user_input):
     return response[0]['generated_text']
 
 # Streamlit UI setup
-st.title("GPT Chat Interface")
+st.title("JK's Chat Interface")
 st.write("Interact with an AI-powered chat interface!")
 
 # User input box
